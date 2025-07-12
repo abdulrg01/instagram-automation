@@ -1,4 +1,5 @@
 const Automation = require("../models/Automation.js");
+const Campaign = require("../models/Campaign.js");
 const InstagramAccount = require("../models/InstagramAccount.js");
 const {
   getInstagramAccountsService,
@@ -89,7 +90,7 @@ const exchangeTokenAndConnect = async (req, res) => {
 
     // 6. Save to DB
     const saved = await InstagramAccount.create({
-      userId,
+      user: userId,
       igBusinessId: igId,
       pageId: page.id,
       accessToken,
@@ -145,9 +146,17 @@ const saveSelectedPostsHandler = async (req, res) => {
     const userId = req.user;
     const { automationId, posts } = req.body;
 
-    const automation = await Automation.findOne({ _id: automationId, userId });
+    const automation = await Automation.findOne({
+      _id: automationId,
+      user: userId,
+    });
     if (!automation)
       return res.status(404).json({ message: "Automation rule not found" });
+
+    const campaigns = await Campaign.find({
+      user: userId,
+      assignedRules: automationId,
+    });
 
     // Avoid duplicates
     const newPosts = posts.filter(
@@ -156,6 +165,9 @@ const saveSelectedPostsHandler = async (req, res) => {
 
     automation.posts.push(...newPosts);
     await automation.save();
+
+    campaigns.postsData.push(...newPosts);
+    await campaigns.save();
 
     res
       .status(200)

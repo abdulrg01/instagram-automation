@@ -1,5 +1,24 @@
 const mongoose = require("mongoose");
 
+const postsMedia = new mongoose.Schema({
+  id: {
+    type: String,
+  },
+  postId: {
+    type: String,
+  },
+  caption: {
+    type: String,
+  },
+  media: {
+    type: String,
+  },
+  mediaType: {
+    type: String,
+    enum: ["IMAGE", "VIDEO", "CAROUSEL_ALBUM"],
+  },
+});
+
 const campaignSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   instagramAccountId: {
@@ -9,6 +28,7 @@ const campaignSchema = new mongoose.Schema({
   name: String,
   description: String,
   posts: [{ type: String }], // Post IDs (IG media IDs)
+  postsData: [postsMedia],
   assignedRules: [
     { type: mongoose.Schema.Types.ObjectId, ref: "AutomationRule" },
   ],

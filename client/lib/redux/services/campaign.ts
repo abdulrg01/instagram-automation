@@ -1,4 +1,4 @@
-import { CampaignProps } from "@/constant/types/automation";
+import { CampaignDataProps, CampaignProps } from "@/constant/types/automation";
 import { authApi } from "./auth";
 
 const campaignApi = authApi.injectEndpoints({
@@ -12,7 +12,7 @@ const campaignApi = authApi.injectEndpoints({
         method: "GET",
       }),
     }),
-    createCampaign: builder.mutation<CampaignProps, Partial<CampaignProps>>({
+    createCampaign: builder.mutation<CampaignProps, Partial<CampaignDataProps>>({
       query: (body) => ({ url: "/campaigns", method: "POST", body }),
     }),
     updateCampaign: builder.mutation<

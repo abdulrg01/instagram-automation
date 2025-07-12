@@ -62,7 +62,7 @@ const Layout = () => {
           />
         );
       case "campaigns":
-        return <CampaignManagement />;
+        return <CampaignManagement user={user} />;
       default:
         return <HomeSection user={user} />;
     }

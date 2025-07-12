@@ -2,10 +2,13 @@ import { instagramAccountsProps, User } from "./auth";
 
 export interface InstagramPostsProps {
   id: string;
+  _id: string;
+  postId: string;
   caption?: string;
-  media_url: string;
+  media: string;
+  status: string;
   timestamp?: Date;
-  media_type: "IMAGE" | "VIDEO" | "CAROUSEL_ALBUM";
+  mediaType: "IMAGE" | "VIDEO" | "CAROUSEL_ALBUM";
   title?: string;
   type?: string;
   engagement?: number;
@@ -74,8 +77,17 @@ export interface CampaignProps {
   startDate: string;
   instagramAccountId: string;
   performance: CampaignPerformance;
-  automations: AutomationProps[];
-  posts: InstagramPostsProps[];
+  assignedRules: AutomationProps[];
+  postsData: InstagramPostsProps[];
+}
+
+export interface CampaignDataProps {
+  name: string;
+  description: string;
+  category: string;
+  instagramAccountId: string;
+  assignedRules: string[];
+  posts: string[];
 }
 
 interface StatWithChange {

@@ -2,14 +2,24 @@ const Campaign = require("../models/Campaign.js");
 const EngagementLog = require("../models/engagementLog.js");
 
 const createCampaignService = async (data, userId) => {
-  const { name, description, automationRules, posts, category } = data;
+  const {
+    name,
+    description,
+    assignedRules,
+    posts,
+    category,
+    status,
+    instagramAccountId,
+  } = data;
   return await Campaign.create({
     userId,
     name,
     description,
-    automationRules,
+    assignedRules,
     posts,
     category,
+    status,
+    instagramAccountId,
   });
 };
 
@@ -23,7 +33,7 @@ const getCampaignsService = async (userId) => {
 const getAllCampaignsService = async (userId) => {
   try {
     const campaigns = await Campaign.find({ userId })
-      .populate("automationRules")
+      .populate("assignedRules")
       .lean();
 
     const campaignIds = campaigns.map((c) => c._id);
@@ -81,7 +91,7 @@ const getAllCampaignsService = async (userId) => {
 const getCampaignByIdService = async (campaignId) => {
   try {
     const campaign = await Campaign.findById(campaignId)
-      .populate("automationRules")
+      .populate("assignedRules")
       .lean();
 
     if (!campaign)
