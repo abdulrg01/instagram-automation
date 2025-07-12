@@ -40,6 +40,7 @@ app.use("/api/v1/rules", require("./routes/automation.route"));
 app.use("/api/v1/meta", require("./routes/meta.routes"));
 app.use("/api/v1/webhook", require("./routes/webhookLog.routes"));
 app.use("/api/v1/engagement-logs", require("./routes/engagement.route"));
+app.use("/api/v1/campaigns", require("./routes/campaign.routes"))
 
 app.all("*", (req, res) => {
   res.status(404);

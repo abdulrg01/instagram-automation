@@ -8,16 +8,19 @@ const campaignSchema = new mongoose.Schema({
   },
   name: String,
   description: String,
-  postIds: [String], // IG media IDs
+  posts: [{ type: String }], // Post IDs (IG media IDs)
   assignedRules: [
     { type: mongoose.Schema.Types.ObjectId, ref: "AutomationRule" },
   ],
   status: {
     type: String,
     enum: ["draft", "active", "completed", "archived"],
-    default: "draft",
+    default: "active",
   },
-  createdAt: { type: Date, default: Date.now },
+  startDate: { type: Date, default: Date.now },
+  category: {
+    type: String,
+  },
 });
 
 module.exports = mongoose.model("Campaign", campaignSchema);

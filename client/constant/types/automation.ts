@@ -6,6 +6,9 @@ export interface InstagramPostsProps {
   media_url: string;
   timestamp?: Date;
   media_type: "IMAGE" | "VIDEO" | "CAROUSEL_ALBUM";
+  title?: string;
+  type?: string;
+  engagement?: number;
 }
 
 interface DmProps {
@@ -53,6 +56,26 @@ export interface MonthlyEngagement {
   respondToComment: number;
   dms: number;
   engagement: number;
+}
+
+type CampaignPerformance = {
+  impressions: number;
+  engagement: number;
+  conversions: number;
+  roi: number;
+};
+
+export interface CampaignProps {
+  _id: string;
+  name: string;
+  description: string;
+  category: string;
+  status: string;
+  startDate: string;
+  instagramAccountId: string;
+  performance: CampaignPerformance;
+  automations: AutomationProps[];
+  posts: InstagramPostsProps[];
 }
 
 interface StatWithChange {

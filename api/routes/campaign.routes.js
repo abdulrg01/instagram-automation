@@ -5,11 +5,8 @@ const Campaign = require("../controllers/campaign.controller");
 const router = express.Router();
 
 router.post("/", verifyJWT, Campaign.createCampaign);
-router.get(
-  "/:instagramAccountId",
-  verifyJWT,
-  Campaign.getCampaignsByInstagramAccount
-);
+router.get("/", verifyJWT, Campaign.getAllCampaigns);
+router.get("/:id", verifyJWT, Campaign.getCampaignById);
 router.put("/:id", verifyJWT, Campaign.updateCampaign);
 router.delete("/:id", verifyJWT, Campaign.deleteCampaign);
 
