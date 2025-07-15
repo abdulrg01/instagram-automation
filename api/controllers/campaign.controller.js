@@ -5,8 +5,29 @@ const {
   deleteCampaignService,
   getAllCampaignsService,
   getCampaignByIdService,
+  getCampaignPerformanceService,
+  getCampaignSummariesService,
 } = require("../service/campaign.service");
 const { getUserInfoService } = require("../service/user.service");
+
+const getCampaignPerformance = async (req, res) => {
+  const { campaignId } = req.params;
+  try {
+    const campaignPerformance = await getCampaignPerformanceService(campaignId);
+    res.status(200).json(campaignPerformance);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+const getCampaignSummaries = async (req, res) => {
+  try {
+    const campaignSummaries = await getCampaignSummariesService(req.user);
+    res.status(200).json(campaignSummaries);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
 const createCampaign = async (req, res) => {
   const userId = req.user;
@@ -83,6 +104,8 @@ module.exports = {
   getCampaigns,
   getCampaignById,
   getAllCampaigns,
+  getCampaignSummaries,
+  getCampaignPerformance,
   updateCampaign,
   deleteCampaign,
 };

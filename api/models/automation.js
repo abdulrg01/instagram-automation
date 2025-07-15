@@ -40,7 +40,7 @@ const Post = new mongoose.Schema({
   },
 });
 
-const automationRuleSchema = new mongoose.Schema({
+const automation = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
@@ -111,5 +111,4 @@ const automationRuleSchema = new mongoose.Schema({
 });
 
 module.exports =
-  mongoose.models.Automation ||
-  mongoose.model("Automation", automationRuleSchema);
+  mongoose.models.Automation || mongoose.model("Automation", automation);

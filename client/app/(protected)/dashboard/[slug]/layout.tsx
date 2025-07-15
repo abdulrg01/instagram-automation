@@ -51,6 +51,7 @@ const Layout = () => {
           <IntegrationSection
             instagramAccounts={instagramAccounts}
             refetch={refetch}
+            user={user}
           />
         );
       case "automation":

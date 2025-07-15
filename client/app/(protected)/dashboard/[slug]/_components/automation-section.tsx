@@ -66,6 +66,7 @@ import {
   useGetEngagementQuery,
   useGetPerformanceSummaryQuery,
 } from "@/lib/redux/services/engagement";
+import { ConnectInstagramAccountModel } from "./connectInstagramAccount";
 
 interface UserProps {
   user: User | null;
@@ -86,6 +87,7 @@ export function AutomationSection({
   );
   const [editingRule, setEditingRule] = useState<AutomationProps | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showInstagramModal, setShowInstagramModal] = useState(false);
 
   const [updateRule, { isSuccess, isLoading }] = useUpdateRuleMutation();
   const [
@@ -165,19 +167,6 @@ export function AutomationSection({
     automationRules.reduce((total, rule) => total + rule.avgResponseTime, 0) /
       automationRules.length;
 
-  const handleConnect = () => {
-    const scope = [
-      "pages_show_list",
-      "instagram_basic",
-      "pages_read_engagement",
-      "instagram_manage_messages",
-    ].join(",");
-
-    const fbLoginUrl = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${process.env.NEXT_PUBLIC_FB_APP_ID}&redirect_uri=${process.env.NEXT_PUBLIC_REDIRECT_URI}&scope=${scope}&response_type=code`;
-
-    window.location.href = fbLoginUrl;
-  };
-
   const handleDelete = async (id: string) => {
     console.log("Deleting rule:", id);
     await deleteRule(id).unwrap();
@@ -200,7 +189,7 @@ export function AutomationSection({
           {instagramAccounts && instagramAccounts?.length === 0 ? (
             <Button
               className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
-              onClick={handleConnect}
+              onClick={() => setShowInstagramModal(true)}
             >
               <Plus className="w-4 h-4 mr-2" />
               Connect Instagram Accounts
@@ -387,19 +376,18 @@ export function AutomationSection({
                 </div>
               ))
             ) : instagramAccounts?.length === 0 ? (
-              <div className="text-center p-8">
-                <p className="text-gray-500">No automation rules found.</p>
-                <p className="text-gray-500 pb-3">
-                  Connect Instagram Accounts.
-                </p>
-                <Button
-                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
-                  onClick={handleConnect}
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Connect Instagram Accounts
-                </Button>
-              </div>
+              <Card className="border-0 shadow-lg flex items-center justify-center">
+                <CardDescription>Connect Instagram Accounts.</CardDescription>
+                <CardContent className="space-y-4">
+                  <Button
+                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                    onClick={handleConnect}
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Connect Instagram Accounts
+                  </Button>
+                </CardContent>
+              </Card>
             ) : (
               <div className="text-center p-8">
                 <p className="text-gray-500">No automation rules found.</p>
@@ -511,6 +499,11 @@ export function AutomationSection({
         <CreateRuleModal
           isOpen={showCreateModal}
           onClose={() => setShowCreateModal(false)}
+          user={user}
+        />
+        <ConnectInstagramAccountModel
+          isOpen={showInstagramModal}
+          onClose={() => setShowInstagramModal(false)}
           user={user}
         />
       </div>

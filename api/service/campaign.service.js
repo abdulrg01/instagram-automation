@@ -23,11 +23,102 @@ const createCampaignService = async (data, userId) => {
   });
 };
 
+const getCampaignSummariesService = async (userId) => {
+  try {
+    const campaigns = await Campaign.find({ user: userId })
+      .populate("assignedRules")
+      .lean();
+
+    const summary = campaigns.map((campaign) => {
+      const activeRules = campaign.assignedRules.filter(
+        (rule) => rule.status === "active"
+      );
+
+      const totalResponses = campaign.assignedRules.reduce(
+        (sum, rule) => sum + (rule.responses || 0),
+        0
+      );
+
+      const totalTriggers = campaign.assignedRules.reduce(
+        (sum, rule) => sum + (rule.totalTrigger || 0),
+        0
+      );
+
+      const rate =
+        totalTriggers > 0
+          ? Math.round((totalResponses / totalTriggers) * 100)
+          : 0;
+
+      return {
+        name: campaign.name,
+        active: activeRules.length,
+        responses: totalResponses,
+        rate,
+      };
+    });
+
+    return summary;
+  } catch (err) {
+    console.error("getCampaignSummaries error:", err);
+    new Error({ message: "Error fetching campaign summary", error: err });
+  }
+};
+
 const getCampaignsService = async (userId) => {
   if (!userId) {
     throw new Error("User ID is required");
   }
   return await Campaign.find({ userId });
+};
+
+const getCampaignPerformanceService = async (campaignId) => {
+  try {
+    const result = await EngagementLog.aggregate([
+      {
+        $match: {
+          campaignId: new mongoose.Types.ObjectId(campaignId),
+        },
+      },
+      {
+        $group: {
+          _id: {
+            week: { $isoWeek: "$timestamp" },
+            year: { $isoWeekYear: "$timestamp" },
+          },
+          impressions: { $sum: 1 },
+          engagement: {
+            $sum: {
+              $cond: [{ $eq: ["$responseSent", true] }, 1, 0],
+            },
+          },
+          conversions: {
+            $sum: {
+              $cond: [{ $eq: ["$triggerType", "DM"] }, 1, 0],
+            },
+          },
+        },
+      },
+      {
+        $sort: { "_id.year": 1, "_id.week": 1 },
+      },
+      {
+        $project: {
+          week: {
+            $concat: ["Week ", { $toString: "$_id.week" }],
+          },
+          impressions: 1,
+          engagement: 1,
+          conversions: 1,
+          _id: 0,
+        },
+      },
+    ]);
+
+    return result;
+  } catch (error) {
+    console.error("Error getting weekly performance:", error);
+    new Error({ message: "Server Error", error });
+  }
 };
 
 const getAllCampaignsService = async (userId) => {
@@ -94,8 +185,7 @@ const getCampaignByIdService = async (campaignId) => {
       .populate("assignedRules")
       .lean();
 
-    if (!campaign)
-      return res.status(404).json({ message: "Campaign not found" });
+    if (!campaign) return new Error({ message: "Campaign not found" });
 
     // Aggregate engagement logs for this campaign
     const logs = await EngagementLog.find({ campaignId });
@@ -134,6 +224,8 @@ module.exports = {
   getCampaignsService,
   getCampaignByIdService,
   getAllCampaignsService,
+  getCampaignSummariesService,
+  getCampaignPerformanceService,
   updateCampaignService,
   deleteCampaignService,
 };

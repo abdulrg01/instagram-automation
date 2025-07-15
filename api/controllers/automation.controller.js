@@ -1,4 +1,4 @@
-const Automation = require("../models/Automation");
+const Automation = require("../models/automation");
 const {
   addListenerToAutomation,
   keywordsService,

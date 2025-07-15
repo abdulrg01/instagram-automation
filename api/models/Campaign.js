@@ -30,7 +30,7 @@ const campaignSchema = new mongoose.Schema({
   posts: [{ type: String }], // Post IDs (IG media IDs)
   postsData: [postsMedia],
   assignedRules: [
-    { type: mongoose.Schema.Types.ObjectId, ref: "AutomationRule" },
+    { type: mongoose.Schema.Types.ObjectId, ref: "Automation" },
   ],
   status: {
     type: String,

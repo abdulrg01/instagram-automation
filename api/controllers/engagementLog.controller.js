@@ -120,8 +120,8 @@ const getEngagementSummaries = async (req, res) => {
 
 const getMonthlyEngagement = async (req, res) => {
   try {
-    const userId = req.user.id;
-    const account = await InstagramAccount.findOne({ userId });
+    const userId = req.user;
+    const account = await InstagramAccount.findOne({ user: userId });
 
     if (!account)
       return res.status(404).json({ message: "No IG account found" });

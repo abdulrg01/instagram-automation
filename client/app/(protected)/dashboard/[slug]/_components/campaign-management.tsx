@@ -53,156 +53,11 @@ import {
 } from "lucide-react";
 import { CreateCampaignModal } from "./create-campaign-modal";
 import { User } from "@/constant/types/auth";
-import { useGetCampaignsQuery } from "@/lib/redux/services/campaign";
+import {
+  useGetCampaignPerformanceQuery,
+  useGetCampaignsQuery,
+} from "@/lib/redux/services/campaign";
 import { CampaignProps } from "@/constant/types/automation";
-
-// Mock data for campaigns
-// const campaigns = [
-//   {
-//     _id: "camp_1",
-//     name: "Summer Collection Launch",
-//     description:
-//       "Promote new summer fashion collection with automated responses and DM campaigns",
-//     status: "active",
-//     category: "Product Launch",
-//     startDate: "2024-06-01",
-//     performance: {
-//       impressions: 125000,
-//       engagement: 8500,
-//       conversions: 180,
-//       roi: 320,
-//     },
-//     assignedRules: [
-//       {
-//         _id: "auto_1",
-//         name: "Product Inquiry Bot",
-//         responseType: "Comment Reply",
-//         status: "active",
-//       },
-//       {
-//         _id: "auto_2",
-//         name: "Welcome New Followers",
-//         responseType: "DM Automation",
-//         status: "active",
-//       },
-//       {
-//         _id: "auto_3",
-//         name: "Size Guide Helper",
-//         responseType: "Comment Reply",
-//         status: "active",
-//       },
-//     ],
-//     postsData: [
-//       {
-//         _id: "post_1",
-//         title: "Summer Dress Collection",
-//         type: "Feed Post",
-//         engagement: 1200,
-//       },
-//       {
-//         _id: "post_2",
-//         title: "Beach Accessories",
-//         type: "Story",
-//         engagement: 800,
-//       },
-//       {
-//         _id: "post_3",
-//         title: "Style Guide Video",
-//         type: "Reel",
-//         engagement: 2400,
-//       },
-//     ],
-//   },
-//   {
-//     _id: "camp_2",
-//     name: "Customer Support Enhancement",
-//     description:
-//       "Improve customer service with automated support responses and FAQ handling",
-//     status: "active",
-//     category: "Customer Service",
-//     startDate: "2024-05-15",
-//     performance: {
-//       impressions: 85000,
-//       engagement: 6200,
-//       conversions: 95,
-//       roi: 180,
-//     },
-//     assignedRules: [
-//       {
-//         _id: "auto_4",
-//         name: "FAQ Responder",
-//         responseType: "Comment Reply",
-//         status: "active",
-//       },
-//       {
-//         _id: "auto_5",
-//         name: "Support Ticket Creator",
-//         responseType: "DM Automation",
-//         status: "active",
-//       },
-//     ],
-//     postsData: [
-//       {
-//         _id: "post_4",
-//         title: "How to Contact Us",
-//         type: "Feed Post",
-//         engagement: 600,
-//       },
-//       {
-//         _id: "post_5",
-//         title: "FAQ Highlights",
-//         type: "Story",
-//         engagement: 400,
-//       },
-//     ],
-//   },
-//   {
-//     _id: "camp_3",
-//     name: "Black Friday Sale",
-//     description:
-//       "Maximize Black Friday sales with targeted automation and promotional content",
-//     status: "paused",
-//     category: "Sales Event",
-//     startDate: "2024-11-20",
-//     performance: {
-//       impressions: 0,
-//       engagement: 0,
-//       conversions: 0,
-//       roi: 0,
-//     },
-//     assignedRules: [
-//       {
-//         _id: "auto_6",
-//         name: "Sale Announcer",
-//         responseType: "Comment Reply",
-//         status: "draft",
-//       },
-//       {
-//         _id: "auto_7",
-//         name: "Discount Code Sender",
-//         responseType: "DM Automation",
-//         status: "draft",
-//       },
-//     ],
-//     postsData: [
-//       {
-//         _id: "post_6",
-//         title: "Black Friday Preview",
-//         type: "Feed Post",
-//         engagement: 0,
-//       },
-//       { _id: "post_7", title: "Sale Countdown", type: "Story", engagement: 0 },
-//     ],
-//   },
-// ];
-
-// Performance data for charts
-const campaignPerformanceData = [
-  { week: "Week 1", impressions: 15000, engagement: 1200, conversions: 45 },
-  { week: "Week 2", impressions: 18000, engagement: 1450, conversions: 52 },
-  { week: "Week 3", impressions: 22000, engagement: 1800, conversions: 68 },
-  { week: "Week 4", impressions: 25000, engagement: 2100, conversions: 75 },
-];
 
 interface Props {
   user: User | null;
@@ -213,6 +68,9 @@ export function CampaignManagement({ user }: Props) {
   const [currentView, setCurrentView] = useState<"list" | "detail">("list");
   const [selectedCampaign, setSelectedCampaign] =
     useState<Partial<CampaignProps> | null>(null);
+  const { data: campaignPerformanceData = [] } = useGetCampaignPerformanceQuery(
+    selectedCampaign?._id
+  );
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
@@ -273,7 +131,9 @@ export function CampaignManagement({ user }: Props) {
                     Active Campaigns
                   </p>
                   <p className="text-2xl font-bold text-purple-800">
-                    {campaigns?.filter((c) => c.status === "active").length}
+                    {campaigns
+                      ? campaigns.filter((c) => c.status === "active").length
+                      : "0"}
                   </p>
                 </div>
                 <Target className="w-8 h-8 text-purple-600" />
@@ -289,11 +149,12 @@ export function CampaignManagement({ user }: Props) {
                     Total Automations
                   </p>
                   <p className="text-2xl font-bold text-green-800">
-                    {campaigns &&
-                      campaigns.reduce(
-                        (sum, c) => sum + c.assignedRules.length,
-                        0
-                      )}
+                    {campaigns
+                      ? campaigns.reduce(
+                          (sum, c) => sum + c.assignedRules.length,
+                          0
+                        )
+                      : "0"}
                   </p>
                 </div>
                 <Bot className="w-8 h-8 text-green-600" />
@@ -309,7 +170,12 @@ export function CampaignManagement({ user }: Props) {
                     Total Posts
                   </p>
                   <p className="text-2xl font-bold text-blue-800">
-                    {campaigns?.reduce((sum, c) => sum + c.postsData.length, 0)}
+                    {campaigns
+                      ? campaigns.reduce(
+                          (sum, c) => sum + c.postsData.length,
+                          0
+                        )
+                      : "0"}
                   </p>
                 </div>
                 <MessageCircle className="w-8 h-8 text-blue-600" />
@@ -323,13 +189,14 @@ export function CampaignManagement({ user }: Props) {
                 <div>
                   <p className="text-sm font-medium text-orange-700">Avg ROI</p>
                   <p className="text-2xl font-bold text-orange-800">
-                    {campaigns &&
-                      Math.round(
-                        campaigns?.reduce(
-                          (sum, c) => sum + c.performance.roi,
-                          0
-                        ) / campaigns?.length
-                      )}
+                    {campaigns
+                      ? Math.round(
+                          campaigns?.reduce(
+                            (sum, c) => sum + c.performance.roi,
+                            0
+                          ) / campaigns?.length
+                        )
+                      : "0"}
                     %
                   </p>
                 </div>
@@ -391,98 +258,108 @@ export function CampaignManagement({ user }: Props) {
         </Card>
 
         {/* Campaigns Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-          {filteredCampaigns?.map((campaign) => (
-            <Card
-              key={campaign._id}
-              className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
-              onClick={() => handleViewCampaign(campaign)}
-            >
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <CardTitle className="text-lg mb-1">
-                      {campaign.name}
-                    </CardTitle>
-                    <Badge
-                      className={
-                        campaign.status === "active"
-                          ? "bg-green-100 text-green-700"
-                          : campaign.status === "paused"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : "bg-gray-100 text-gray-700"
-                      }
-                    >
-                      {campaign.status === "active" && (
-                        <CheckCircle className="w-3 h-3 mr-1" />
-                      )}
-                      {campaign.status === "paused" && (
-                        <Pause className="w-3 h-3 mr-1" />
-                      )}
-                      {campaign.status === "draft" && (
-                        <Clock className="w-3 h-3 mr-1" />
-                      )}
-                      {campaign.status}
-                    </Badge>
-                  </div>
-                  <Button variant="ghost" size="sm">
-                    <MoreHorizontal className="w-4 h-4" />
-                  </Button>
-                </div>
-                <p className="text-sm text-gray-600 line-clamp-2">
-                  {campaign.description}
+        <div>
+          {filteredCampaigns && filteredCampaigns?.length > 0 ? (
+            filteredCampaigns?.map((campaign) => (
+              <div
+                key={campaign._id}
+                className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6"
+              >
+                <Card
+                  className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
+                  onClick={() => handleViewCampaign(campaign)}
+                >
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <CardTitle className="text-lg mb-1">
+                          {campaign.name}
+                        </CardTitle>
+                        <Badge
+                          className={
+                            campaign.status === "active"
+                              ? "bg-green-100 text-green-700"
+                              : campaign.status === "paused"
+                              ? "bg-yellow-100 text-yellow-700"
+                              : "bg-gray-100 text-gray-700"
+                          }
+                        >
+                          {campaign.status === "active" && (
+                            <CheckCircle className="w-3 h-3 mr-1" />
+                          )}
+                          {campaign.status === "paused" && (
+                            <Pause className="w-3 h-3 mr-1" />
+                          )}
+                          {campaign.status === "draft" && (
+                            <Clock className="w-3 h-3 mr-1" />
+                          )}
+                          {campaign.status}
+                        </Badge>
+                      </div>
+                      <Button variant="ghost" size="sm">
+                        <MoreHorizontal className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    <p className="text-sm text-gray-600 line-clamp-2">
+                      {campaign.description}
+                    </p>
+                  </CardHeader>
+
+                  <CardContent className="space-y-4">
+                    {/* Campaign Stats */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center p-3 bg-purple-50 rounded-lg">
+                        <div className="text-lg font-bold text-purple-800">
+                          {campaign.assignedRules.length}
+                        </div>
+                        <div className="text-xs text-purple-600">
+                          Automations
+                        </div>
+                      </div>
+                      <div className="text-center p-3 bg-blue-50 rounded-lg">
+                        <div className="text-lg font-bold text-blue-800">
+                          {campaign.postsData.length}
+                        </div>
+                        <div className="text-xs text-blue-600">Posts</div>
+                      </div>
+                    </div>
+
+                    {/* Campaign Category */}
+                    <div className="flex items-center justify-between pt-2 border-t">
+                      <Badge variant="outline" className="text-xs">
+                        <Folder className="w-3 h-3 mr-1" />
+                        {campaign.category}
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            ))
+          ) : (
+            <div className="text-center">
+              <div className="text-center py-12">
+                <Target className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  No Campaigns Found
+                </h3>
+                <p className="text-gray-500 mb-4">
+                  {searchTerm ||
+                  filterStatus !== "all" ||
+                  filterCategory !== "all"
+                    ? "Try adjusting your search or filters"
+                    : "Create your first campaign to get started"}
                 </p>
-              </CardHeader>
-
-              <CardContent className="space-y-4">
-                {/* Campaign Stats */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-3 bg-purple-50 rounded-lg">
-                    <div className="text-lg font-bold text-purple-800">
-                      {campaign.assignedRules.length}
-                    </div>
-                    <div className="text-xs text-purple-600">Automations</div>
-                  </div>
-                  <div className="text-center p-3 bg-blue-50 rounded-lg">
-                    <div className="text-lg font-bold text-blue-800">
-                      {campaign.postsData.length}
-                    </div>
-                    <div className="text-xs text-blue-600">Posts</div>
-                  </div>
-                </div>
-
-                {/* Campaign Category */}
-                <div className="flex items-center justify-between pt-2 border-t">
-                  <Badge variant="outline" className="text-xs">
-                    <Folder className="w-3 h-3 mr-1" />
-                    {campaign.category}
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                <Button
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                  onClick={() => setShowCreateModal(true)}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Campaign
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
-
-        {filteredCampaigns?.length === 0 && (
-          <div className="text-center py-12">
-            <Target className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              No Campaigns Found
-            </h3>
-            <p className="text-gray-500 mb-4">
-              {searchTerm || filterStatus !== "all" || filterCategory !== "all"
-                ? "Try adjusting your search or filters"
-                : "Create your first campaign to get started"}
-            </p>
-            <Button
-              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
-              onClick={() => setShowCreateModal(true)}
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Create Campaign
-            </Button>
-          </div>
-        )}
 
         <CreateCampaignModal
           isOpen={showCreateModal}
@@ -623,7 +500,13 @@ export function CampaignManagement({ user }: Props) {
               className="h-[300px]"
             >
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={campaignPerformanceData}>
+                <LineChart
+                  data={
+                    campaignPerformanceData
+                      ? campaignPerformanceData
+                      : undefined
+                  }
+                >
                   <CartesianGrid
                     strokeDasharray="3 3"
                     className="stroke-gray-200"

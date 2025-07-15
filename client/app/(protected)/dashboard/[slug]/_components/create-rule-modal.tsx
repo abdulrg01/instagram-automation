@@ -41,6 +41,7 @@ import { User } from "@/constant/types/auth";
 import { instagramAccountsProps } from "@/constant/types/auth";
 import { useCreateRuleMutation } from "@/lib/redux/services/automation";
 import Loader from "@/components/global/loader";
+import { ConnectInstagramAccountModel } from "./connectInstagramAccount";
 
 interface CreateRuleModalProps {
   isOpen: boolean;
@@ -62,6 +63,7 @@ export function CreateRuleModal({
     }
   );
   const [createRule, { isSuccess, isLoading }] = useCreateRuleMutation();
+  const [showInstagramModal, setShowInstagramModal] = useState(false);
 
   const [currentStep, setCurrentStep] = useState<"accounts" | "form">(
     "accounts"
@@ -154,19 +156,6 @@ export function CreateRuleModal({
       analyticsTracking: true,
     });
     onClose();
-  };
-
-  const handleConnect = () => {
-    const scope = [
-      "pages_show_list",
-      "instagram_basic",
-      "pages_read_engagement",
-      "instagram_manage_messages",
-    ].join(",");
-
-    const fbLoginUrl = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${process.env.NEXT_PUBLIC_FB_APP_ID}&redirect_uri=${process.env.NEXT_PUBLIC_REDIRECT_URI}&scope=${scope}&response_type=code`;
-
-    window.location.href = fbLoginUrl;
   };
 
   return (
@@ -274,7 +263,7 @@ export function CreateRuleModal({
                       rules.
                     </p>
                     <Button
-                      onClick={handleConnect}
+                      onClick={() => setShowInstagramModal(true)}
                       className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
                     >
                       <Instagram className="w-4 h-4 mr-2" />
@@ -403,12 +392,8 @@ export function CreateRuleModal({
                             <SelectValue placeholder="Select rule type" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="DM">
-                              DM
-                            </SelectItem>
-                            <SelectItem value="COMMENT">
-                              COMMENT
-                            </SelectItem>
+                            <SelectItem value="DM">DM</SelectItem>
+                            <SelectItem value="COMMENT">COMMENT</SelectItem>
                             <SelectItem value="Story Reply">
                               Story Reply
                             </SelectItem>
@@ -644,6 +629,11 @@ export function CreateRuleModal({
             </div>
           </>
         )}
+        <ConnectInstagramAccountModel
+          isOpen={showInstagramModal}
+          onClose={() => setShowInstagramModal(false)}
+          user={user}
+        />
       </DialogContent>
     </Dialog>
   );

@@ -23,35 +23,25 @@ import {
 } from "lucide-react";
 import Loader from "@/components/global/loader";
 import { useTokenRefreshMutation } from "@/lib/redux/services/meta";
-import { useEffect } from "react";
-import { instagramAccountsProps } from "@/constant/types/auth";
+import { useEffect, useState } from "react";
+import { instagramAccountsProps, User } from "@/constant/types/auth";
+import { ConnectInstagramAccountModel } from "./connectInstagramAccount";
 
 interface UserProps {
   instagramAccounts: instagramAccountsProps[] | undefined;
   refetch: () => void;
+  user: User | null
 }
 
-export function IntegrationSection({ instagramAccounts, refetch }: UserProps) {
+export function IntegrationSection({ instagramAccounts, refetch, user }: UserProps) {
   const [tokenRefresh, { isSuccess, isLoading }] = useTokenRefreshMutation();
+  const [showInstagramModal, setShowInstagramModal] = useState(false);
 
   useEffect(() => {
     if (isSuccess) {
       refetch();
     }
   }, [isSuccess, refetch]);
-
-  const handleConnect = () => {
-    const scope = [
-      "pages_show_list",
-      "instagram_basic",
-      "pages_read_engagement",
-      "instagram_manage_messages",
-    ].join(",");
-
-    const fbLoginUrl = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${process.env.NEXT_PUBLIC_FB_APP_ID}&redirect_uri=${process.env.NEXT_PUBLIC_REDIRECT_URI}&scope=${scope}&response_type=code`;
-
-    window.location.href = fbLoginUrl;
-  };
 
   const handleRefresh = async (id: string) => {
     await tokenRefresh(id);
@@ -70,7 +60,7 @@ export function IntegrationSection({ instagramAccounts, refetch }: UserProps) {
           </p>
         </div>
         <Button
-          onClick={handleConnect}
+          onClick={() => setShowInstagramModal(true)}
           className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
         >
           <Instagram className="w-4 h-4 mr-2" />
@@ -171,7 +161,7 @@ export function IntegrationSection({ instagramAccounts, refetch }: UserProps) {
               </CardDescription>
               <CardContent className="space-y-4">
                 <Button
-                  onClick={handleConnect}
+                  onClick={() => setShowInstagramModal(true)}
                   className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
                 >
                   <Instagram className="w-4 h-4 mr-2" />
@@ -393,6 +383,11 @@ export function IntegrationSection({ instagramAccounts, refetch }: UserProps) {
           </div>
         </CardContent>
       </Card>
+      <ConnectInstagramAccountModel
+        isOpen={showInstagramModal}
+        onClose={() => setShowInstagramModal(false)}
+        user={user}
+      />
     </div>
   );
 }

@@ -20,8 +20,6 @@ import {
   YAxis,
   CartesianGrid,
   ResponsiveContainer,
-  Bar,
-  BarChart,
 } from "recharts";
 import {
   MessageCircle,
@@ -43,24 +41,15 @@ import StatCard from "./StatCard";
 import { CreateCampaignModal } from "./create-campaign-modal";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-
-const campaignData = [
-  { name: "Welcome Series", active: 12, responses: 847, rate: 94 },
-  { name: "Product Launch", active: 8, responses: 623, rate: 87 },
-  { name: "Customer Support", active: 15, responses: 1205, rate: 96 },
-  { name: "Lead Generation", active: 6, responses: 456, rate: 82 },
-];
+import { useGetUserCampaignSummaryQuery } from "@/lib/redux/services/campaign";
 
 interface UserProps {
   user: User | null;
 }
 
 export function HomeSection({ user }: UserProps) {
-  const {
-    data: engagementData = [],
-    isLoading: isLoadingEngagementData,
-    error,
-  } = useGetMonthlyEngagementQuery();
+  const { data: campaignData = [] } = useGetUserCampaignSummaryQuery();
+  const { data: engagementData = [] } = useGetMonthlyEngagementQuery();
   const { data: summaries = [], isLoading } = useGetEngagementSummariesQuery();
 
   const { data: homeStats, isLoading: isLoadingHomeStats } =
@@ -95,8 +84,16 @@ export function HomeSection({ user }: UserProps) {
         <StatCard
           isLoadingHomeStats={isLoadingHomeStats}
           label="Auto Replies"
-          value={homeStats?.autoReplies.count}
-          change={homeStats?.autoReplies.change}
+          value={
+            homeStats?.autoReplies.count && homeStats?.autoReplies.count > 0
+              ? homeStats?.autoReplies.count
+              : 0
+          }
+          change={
+            homeStats?.autoReplies?.change && homeStats.autoReplies.change > 0
+              ? homeStats.autoReplies.change
+              : 0
+          }
           icon={<MessageCircle className="h-4 w-4 text-purple-600" />}
           color="text-purple-800"
           bgColor="from-purple-50 to-purple-100"
@@ -105,8 +102,16 @@ export function HomeSection({ user }: UserProps) {
         <StatCard
           isLoadingHomeStats={isLoadingHomeStats}
           label="DMs Sent"
-          value={homeStats?.dmsSent.count}
-          change={homeStats?.dmsSent.change}
+          value={
+            homeStats?.dmsSent.count && homeStats?.dmsSent.count > 0
+              ? homeStats?.dmsSent.count
+              : 0
+          }
+          change={
+            homeStats?.dmsSent.change && homeStats?.dmsSent.change > 0
+              ? homeStats?.dmsSent.change
+              : 0
+          }
           icon={<Send className="h-4 w-4 text-pink-600" />}
           color="text-pink-800"
           bgColor="from-pink-50 to-pink-100"
@@ -115,8 +120,16 @@ export function HomeSection({ user }: UserProps) {
         <StatCard
           isLoadingHomeStats={isLoadingHomeStats}
           label="Comments"
-          value={homeStats?.comments.count}
-          change={homeStats?.comments.change}
+          value={
+            homeStats?.comments.count && homeStats?.comments.count > 0
+              ? homeStats?.comments.count
+              : 0
+          }
+          change={
+            homeStats?.comments.change && homeStats?.comments.change > 0
+              ? homeStats?.comments.change
+              : 0
+          }
           icon={<Activity className="h-4 w-4 text-emerald-600" />}
           color="text-emerald-800"
           bgColor="from-emerald-50 to-emerald-100"
@@ -148,64 +161,49 @@ export function HomeSection({ user }: UserProps) {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {!isLoadingEngagementData && engagementData.length === 0 && (
-              <div className="text-center text-gray-500">
-                No engagement data available. Try creating a new campaign.
-                <br />
-                {/* <CreateAutomation title="Create Campaign" /> */}
-              </div>
-            )}
-            {isLoadingEngagementData ? (
-              <Loader state={isLoadingEngagementData}>
-                Loading engagement trends...
-              </Loader>
-            ) : error ? (
-              <p className="text-red-500">Error loading engagement data</p>
-            ) : (
-              <ChartContainer
-                config={{
-                  replies: {
-                    label: "Auto Replies",
-                    color: "hsl(var(--chart-1))",
-                  },
-                  dms: {
-                    label: "DMs Sent",
-                    color: "hsl(var(--chart-2))",
-                  },
-                  engagement: {
-                    label: "Total Engagement",
-                    color: "hsl(var(--chart-3))",
-                  },
-                }}
-                className="h-[300px]"
-              >
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={engagementData}>
-                    <CartesianGrid
-                      strokeDasharray="3 3"
-                      className="stroke-gray-200"
-                    />
-                    <XAxis dataKey="month" className="text-xs" />
-                    <YAxis className="text-xs" />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Line
-                      type="monotone"
-                      dataKey="replies"
-                      stroke="#8b5cf6"
-                      strokeWidth={3}
-                      dot={{ fill: "#8b5cf6", strokeWidth: 2, r: 4 }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="dms"
-                      stroke="#ec4899"
-                      strokeWidth={3}
-                      dot={{ fill: "#ec4899", strokeWidth: 2, r: 4 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </ChartContainer>
-            )}
+            <ChartContainer
+              config={{
+                replies: {
+                  label: "Auto Replies",
+                  color: "hsl(var(--chart-1))",
+                },
+                dms: {
+                  label: "DMs Sent",
+                  color: "hsl(var(--chart-2))",
+                },
+                engagement: {
+                  label: "Total Engagement",
+                  color: "hsl(var(--chart-3))",
+                },
+              }}
+              className="h-[300px]"
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={engagementData ? engagementData : undefined}>
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    className="stroke-gray-200"
+                  />
+                  <XAxis dataKey="month" className="text-xs" />
+                  <YAxis className="text-xs" />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Line
+                    type="monotone"
+                    dataKey="replies"
+                    stroke="#8b5cf6"
+                    strokeWidth={3}
+                    dot={{ fill: "#8b5cf6", strokeWidth: 2, r: 4 }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="dms"
+                    stroke="#ec4899"
+                    strokeWidth={3}
+                    dot={{ fill: "#ec4899", strokeWidth: 2, r: 4 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </ChartContainer>
           </CardContent>
         </Card>
 
@@ -219,7 +217,7 @@ export function HomeSection({ user }: UserProps) {
             <CardDescription>Response rates by campaign type</CardDescription>
           </CardHeader>
           <CardContent>
-            <ChartContainer
+            {/* <ChartContainer
               config={{
                 rate: {
                   label: "Response Rate %",
@@ -229,7 +227,11 @@ export function HomeSection({ user }: UserProps) {
               className="h-[300px]"
             >
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={campaignData} layout="horizontal">
+                <BarChart
+                  // data={campaignData ? campaignData : campaignDataB}
+                  data={campaignDataB}
+                  layout="horizontal"
+                >
                   <CartesianGrid
                     strokeDasharray="3 3"
                     className="stroke-gray-200"
@@ -255,6 +257,50 @@ export function HomeSection({ user }: UserProps) {
                   </defs>
                 </BarChart>
               </ResponsiveContainer>
+            </ChartContainer> */}
+
+            <ChartContainer
+              config={{
+                active: {
+                  label: "active Campaigns",
+                  color: "hsl(var(--chart-1))",
+                },
+                responses: {
+                  label: "Total Responses",
+                  color: "hsl(var(--chart-2))",
+                },
+                rate: {
+                  label: "Campaign Rate",
+                  color: "hsl(var(--chart-3))",
+                },
+              }}
+              className="h-[300px]"
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={campaignData ? campaignData : undefined}>
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    className="stroke-gray-200"
+                  />
+                  <XAxis dataKey="name" className="text-xs" />
+                  <YAxis className="text-xs" />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Line
+                    type="monotone"
+                    dataKey="active"
+                    stroke="#8b5cf6"
+                    strokeWidth={3}
+                    dot={{ fill: "#8b5cf6", strokeWidth: 2, r: 4 }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="responses"
+                    stroke="#ec4899"
+                    strokeWidth={3}
+                    dot={{ fill: "#ec4899", strokeWidth: 2, r: 4 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
             </ChartContainer>
           </CardContent>
         </Card>
@@ -272,9 +318,8 @@ export function HomeSection({ user }: UserProps) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <p>Loooooooo</p>
           <div className="space-y-4">
-            {summaries ? (
+            {summaries && summaries.length > 0 ? (
               summaries.map((activity, index) => (
                 <div
                   key={index}
@@ -307,22 +352,24 @@ export function HomeSection({ user }: UserProps) {
                   </Badge>
                 </div>
               ))
-            ) : isLoading ? (
-              <Loader state={isLoading}>Loading recent activity...</Loader>
             ) : (
-              <div className="text-center text-gray-500">
-                No recent activity found.
-                <br />
-                Try creating a new automation campaign.
-                <br />
-                <Button
-                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
-                  onClick={() => setShowCreateModal(true)}
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Create Campaign
-                </Button>
-              </div>
+              <Card className="border-0 shadow-lg flex items-center justify-center">
+                <CardDescription>No recent activity found.</CardDescription>
+                <CardContent className="space-y-3">
+                  <Button
+                    disabled={isLoading}
+                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                    onClick={() => setShowCreateModal(true)}
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    {isLoading ? (
+                      <Loader state={isLoading}>Loading...</Loader>
+                    ) : (
+                      "Create Campaign"
+                    )}
+                  </Button>
+                </CardContent>
+              </Card>
             )}
           </div>
         </CardContent>
@@ -330,6 +377,7 @@ export function HomeSection({ user }: UserProps) {
       <CreateCampaignModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
+        user={user}
       />
     </div>
   );

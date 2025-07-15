@@ -47,6 +47,7 @@ import { useGetInstagramAccountsQuery } from "@/lib/redux/services/meta";
 import { instagramAccountsProps, User } from "@/constant/types/auth";
 import { useGetUserRulesQuery } from "@/lib/redux/services/automation";
 import { CreateRuleModal } from "./create-rule-modal";
+import { ConnectInstagramAccountModel } from "./connectInstagramAccount";
 
 interface CreateCampaignModalProps {
   isOpen: boolean;
@@ -80,6 +81,8 @@ export function CreateCampaignModal({
   const [selectedAutomations, setSelectedAutomations] = useState<string[]>([]);
   const [selectedPosts, setSelectedPosts] = useState<string[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showInstagramModal, setShowInstagramModal] = useState(false);
+
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -152,19 +155,6 @@ export function CreateCampaignModal({
         ? prev.filter((id) => id !== postId)
         : [...prev, postId]
     );
-  };
-
-  const handleConnect = () => {
-    const scope = [
-      "pages_show_list",
-      "instagram_basic",
-      "pages_read_engagement",
-      "instagram_manage_messages",
-    ].join(",");
-
-    const fbLoginUrl = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${process.env.NEXT_PUBLIC_FB_APP_ID}&redirect_uri=${process.env.NEXT_PUBLIC_REDIRECT_URI}&scope=${scope}&response_type=code`;
-
-    window.location.href = fbLoginUrl;
   };
 
   return (
@@ -265,7 +255,7 @@ export function CreateCampaignModal({
                     </CardDescription>
                     <CardContent className="space-y-4">
                       <Button
-                        onClick={handleConnect}
+                        onClick={() => setShowInstagramModal(true)}
                         className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
                       >
                         <Instagram className="w-4 h-4 mr-2" />
@@ -684,6 +674,11 @@ export function CreateCampaignModal({
         <CreateRuleModal
           isOpen={showCreateModal}
           onClose={() => setShowCreateModal(false)}
+          user={user}
+        />
+        <ConnectInstagramAccountModel
+          isOpen={showInstagramModal}
+          onClose={() => setShowInstagramModal(false)}
           user={user}
         />
       </DialogContent>
