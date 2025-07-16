@@ -245,8 +245,8 @@ const sendDM = async (senderId, text) => {
   await withRetry(() =>
     sendInstagramDM(
       senderId,
-      "Hi! We're not sure how to respond to that yet 😅",
-      process.env.DEFAULT_ACCESS_TOKEN
+      "Hi! We're not sure how to respond to that yet",
+      "😅"
     )
   );
 };

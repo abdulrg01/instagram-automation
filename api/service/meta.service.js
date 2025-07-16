@@ -1,4 +1,3 @@
-// COMMENT
 const sendInstagramCommentReply = async (postId, commentId, message) => {
   // You must have a comment ID and page access token
   return await fetch(`https://graph.facebook.com/v19.0/${commentId}/replies`, {
@@ -11,7 +10,6 @@ const sendInstagramCommentReply = async (postId, commentId, message) => {
   });
 };
 
-// DM reply
 const sendInstagramDM = async (recipientId, message) => {
   return await fetch("https://graph.facebook.com/v19.0/me/messages", {
     method: "POST",
