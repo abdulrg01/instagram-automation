@@ -16,43 +16,14 @@ import {
   CheckCircle,
   AlertCircle,
   ArrowLeft,
-  Save,
   Plus,
 } from "lucide-react";
 import { User } from "@/constant/types/auth";
+import { useGetAppByIdQuery, useGetAppsQuery } from "@/lib/redux/services/app";
+import { AppProps } from "@/constant/types/app";
+import { CreateAccount } from "./create-account";
 
-// Mock data for connected Instagram accounts
-const connectedAccounts = [
-  {
-    id: "ig_account_1",
-    username: "@fashionbrand",
-    followers: "125K",
-    status: "connected",
-    profileImage: "/placeholder.svg?height=40&width=40",
-    businessType: "Fashion & Beauty",
-    lastSync: "2 minutes ago",
-  },
-  {
-    id: "ig_account_2",
-    username: "@lifestyle_store",
-    followers: "89K",
-    status: "connected",
-    profileImage: "/placeholder.svg?height=40&width=40",
-    businessType: "Lifestyle",
-    lastSync: "5 minutes ago",
-  },
-  {
-    id: "ig_account_3",
-    username: "@tech_reviews_hub",
-    followers: "67K",
-    status: "warning",
-    profileImage: "/placeholder.svg?height=40&width=40",
-    businessType: "Technology",
-    lastSync: "1 hour ago",
-  },
-];
-
-interface CreateRuleModalProps {
+interface connectIgAccountProps {
   isOpen: boolean;
   onClose: () => void;
   user: User | null;
@@ -61,15 +32,18 @@ interface CreateRuleModalProps {
 export function ConnectInstagramAccountModel({
   isOpen,
   onClose,
-}: CreateRuleModalProps) {
+}: connectIgAccountProps) {
   const [currentStep, setCurrentStep] = useState<"accounts" | "form">(
     "accounts"
   );
-  const [selectedAccount, setSelectedAccount] = useState<
-    (typeof connectedAccounts)[0] | null
-  >(null);
+  const [selectedAccount, setSelectedAccount] = useState<AppProps | null>(null);
+  const { data: connectedAccounts } = useGetAppsQuery();
+  const { data: selectedAccountInfo } = useGetAppByIdQuery(
+    selectedAccount?._id
+  );
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
-  const handleAccountSelect = (account: (typeof connectedAccounts)[0]) => {
+  const handleAccountSelect = (account: AppProps | null) => {
     setSelectedAccount(account);
     setCurrentStep("form");
   };
@@ -94,7 +68,7 @@ export function ConnectInstagramAccountModel({
       "instagram_manage_messages",
     ].join(",");
 
-    const fbLoginUrl = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${process.env.NEXT_PUBLIC_FB_APP_ID}&redirect_uri=${process.env.NEXT_PUBLIC_REDIRECT_URI}&scope=${scope}&response_type=code`;
+    const fbLoginUrl = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${selectedAccountInfo?.appId}&redirect_uri=${process.env.NEXT_PUBLIC_REDIRECT_URI}&scope=${scope}&response_type=code`;
 
     window.location.href = fbLoginUrl;
   };
@@ -116,13 +90,13 @@ export function ConnectInstagramAccountModel({
 
             <div className="space-y-4 mt-6">
               <div className="text-sm font-medium text-gray-700 mb-4">
-                Connected Instagram Accounts ({connectedAccounts.length})
+                Connected Instagram Accounts ({connectedAccounts?.length})
               </div>
 
               <div className="grid gap-4">
-                {connectedAccounts.map((account) => (
+                {connectedAccounts?.map((account) => (
                   <Card
-                    key={account.id}
+                    key={account._id}
                     className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:border-purple-300 border-2"
                     onClick={() => handleAccountSelect(account)}
                   >
@@ -134,14 +108,10 @@ export function ConnectInstagramAccountModel({
                           </div>
                           <div>
                             <h3 className="font-semibold text-gray-900">
-                              {account.username}
+                              {account.appName}
                             </h3>
-                            <p className="text-sm text-gray-500">
-                              {account.followers} followers •{" "}
-                              {account.businessType}
-                            </p>
                             <p className="text-xs text-gray-400">
-                              Last sync: {account.lastSync}
+                              Last sync: {account.createdAt}
                             </p>
                           </div>
                         </div>
@@ -188,7 +158,7 @@ export function ConnectInstagramAccountModel({
                 ))}
               </div>
 
-              {connectedAccounts.length === 0 && (
+              {connectedAccounts?.length === 0 && (
                 <div className="text-center py-12">
                   <Instagram className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">
@@ -220,7 +190,7 @@ export function ConnectInstagramAccountModel({
                 </Button>
                 <div>
                   <DialogTitle className="flex items-center gap-3">
-                    Connect account for {selectedAccount?.username}
+                    Connect account for {selectedAccount?.appName}
                   </DialogTitle>
                   <DialogDescription className="py-2">
                     Configure your new Instagram account for Instagram
@@ -244,11 +214,10 @@ export function ConnectInstagramAccountModel({
                           Selected Account
                         </p>
                         <p className="text-sm text-purple-700">
-                          {selectedAccount?.username} •{" "}
-                          {selectedAccount?.followers} followers
+                          {selectedAccount?.appName} •{" "}
                         </p>
                         <p className="text-xs text-purple-600">
-                          ID: {selectedAccount?.id}
+                          _ID: {selectedAccount?._id}
                         </p>
                       </div>
                     </div>
@@ -264,7 +233,6 @@ export function ConnectInstagramAccountModel({
                     className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
                     onClick={handleConnect}
                   >
-                    <Save className="w-4 h-4 mr-1" />
                     Connect Account
                   </Button>
                   <Button
@@ -279,6 +247,10 @@ export function ConnectInstagramAccountModel({
             </div>
           </>
         )}
+        <CreateAccount
+          isOpen={showCreateModal}
+          onClose={() => setShowCreateModal(false)}
+        />
       </DialogContent>
     </Dialog>
   );

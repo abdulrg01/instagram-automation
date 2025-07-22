@@ -645,7 +645,6 @@ export function CreateCampaignModal({
                   </CardContent>
                 </Card>
 
-                {/* Action Buttons */}
                 <div className="space-y-2">
                   <Button
                     className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"

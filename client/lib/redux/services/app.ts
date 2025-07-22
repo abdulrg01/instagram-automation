@@ -3,10 +3,10 @@ import { authApi } from "./auth";
 
 const appApi = authApi.injectEndpoints({
   endpoints: (builder) => ({
-    getApp: builder.query<AppProps[], void>({
+    getApps: builder.query<AppProps[], void>({
       query: () => ({ url: "/app", method: "GET" }),
     }),
-    getAppById: builder.mutation<AppProps, string>({
+    getAppById: builder.query<AppProps, string | undefined>({
       query: (id) => ({
         url: `/app/${id}`,
         method: "GET",
@@ -33,8 +33,8 @@ const appApi = authApi.injectEndpoints({
 
 export const {
   useCreateAppMutation,
-  useGetAppByIdMutation,
-  useGetAppQuery,
+  useGetAppByIdQuery,
+  useGetAppsQuery,
   useUpdateAppMutation,
   useDeleteAppMutation,
 } = appApi;
